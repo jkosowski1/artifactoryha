@@ -1,0 +1,62 @@
+---
+- name: Create Terraform directories for resource and environment module
+  hosts: all[0]
+  gather_facts: False
+  tasks:
+  - name: Create directories
+    local_action:
+      module: file
+      path: "{{ item }}"
+      state: directory
+    loop:
+      - "{{ terraform_resource_module_dir }}"
+      - "{{ terraform_environment_module_dir }}"
+
+- name: Create Terraform resource module
+  hosts: all[0]
+  gather_facts: False
+  roles:
+    - role: terraform_files
+      vars:
+        dir: "{{ terraform_resource_module_dir }}"
+        is_tf_resource_module: true
+
+- name: Create Terraform environment module
+  hosts: artifactory_nodes:xray_nodes
+  gather_facts: False
+  roles:
+    - role: terraform_files
+      vars:
+        dir: "{{ terraform_environment_module_dir }}"
+        is_tf_resource_module: false
+
+- name: Place shell scripts in Terraform main folder
+  hosts: all[0]
+  gather_facts: False
+  tasks:
+  - name: Copy shell scripts
+    local_action:
+      module: copy
+      force: yes
+      mode: u=rwx,g=rx,o=rx
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    loop:
+      - src: "create.sh"
+        dest: "{{ terraform_dir }}/create.sh"
+      - src: "destroy.sh"
+        dest: "{{ terraform_dir }}/destroy.sh"
+      - src: "init.sh"
+        dest: "{{ terraform_dir }}/init.sh"
+  - name: Create local TF set_credentialls.sh and set_environment.sh from template
+    local_action:
+      module: template
+      force: yes
+      mode: u=rwx,g=rx,o=rx
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    loop:
+      - src: "set_environment.sh.j2"
+        dest: "{{ terraform_dir }}/set_environment.sh"
+      - src: "set_credentialls.sh.j2"
+        dest: "{{ terraform_dir }}/set_credentialls.sh"

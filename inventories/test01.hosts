@@ -1,0 +1,27 @@
+
+arti01 ansible_host=192.168.8.62
+arti02 ansible_host=192.168.8.63
+xray01 ansible_host=192.168.8.64
+xray02 ansible_host=192.168.8.65
+
+[test01_artifactory_nodes]
+arti0[1:2]
+
+[test01_xray_nodes]
+xray0[1:2]
+
+[test01:children]
+test01_artifactory_nodes
+test01_xray_nodes
+
+[test01:vars]
+env=test01
+
+[test:children]
+test01
+
+[xray_nodes:children]
+test01_xray_nodes
+
+[artifactory_nodes:children]
+test01_artifactory_nodes

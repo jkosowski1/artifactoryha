@@ -1,0 +1,149 @@
+provider_vsphere_host: vcenter.test.domain
+provider_vsphere_user: administrator@vsphere.local
+deploy_vsphere_cluster: Cluster
+deploy_vsphere_datastore: RAID6-1
+deploy_vsphere_datacenter: Datacenter
+deploy_vsphere_folder: /Artifactory
+guest_ssh_user: jkosowski
+deploy_vsphere_network: 'VM Network'
+ipv4_gateway: 192.168.8.1
+ipv4_netmask: 24
+dns_server_list:
+  - "192.168.8.97"
+
+terraform_dir: "{{ playbook_dir }}/../{{ lookup('env', 'local_temp_dir') }}/{{ lookup('env', 'tf_temp_dir') }}"
+terraform_resource_module_dir: "{{ terraform_dir }}/module"
+terraform_environment_module_dir: "{{ terraform_dir }}/environments/{{ env }}"
+
+environment_module_variables:
+  - name: provider_vsphere_host
+    type: string
+    description: "vCenter server FQDN or IP"
+  - name: provider_vsphere_user
+    type: string
+    description: "vSphere username to use to connect to the environment"
+  - name: provider_vsphere_password
+    type: string
+    description: "vSphere password"
+    sensitive: "true"
+  - name: deploy_vsphere_datacenter
+    type: string
+    description: "vSphere datacenter in which the virtual machine will be deployed."
+  - name: deploy_vsphere_cluster
+    type: string
+    description: "vSphere cluster in which the virtual machine will be deployed."
+  - name: deploy_vsphere_datastore
+    type: string
+    description: "Datastore in which the virtual machine will be deployed."
+  - name: deploy_vsphere_folder
+    type: string
+    description: "The path to the folder to put this virtual machine in, relative to the datacenter that the resource pool is in."
+  - name: deploy_vsphere_network
+    type: string
+    description: "Portgroup to which the virtual machine will be connected."
+  - name: guest_template
+    type: string
+    description: "The source virtual machine or template to clone from."
+  - name: ipv4_netmask
+    type: string
+    description: "The IPv4 subnet mask, in bits (example: 24 for 255.255.255.0)."
+  - name: ipv4_gateway
+    type: string
+    description: "The IPv4 default gateway."
+  - name: domain
+    type: string
+    description: "The domain name for this machine."
+  - name: guest_ssh_user
+    type: string
+    description: "SSH username to connect to the guest VM."
+  - name: guest_ssh_password
+    type: string
+    description: "SSH password to connect to the guest VM."
+
+resource_module_variables:
+  - name: provider_vsphere_host
+    type: string
+    description: "vCenter server FQDN or IP"
+  - name: provider_vsphere_user
+    type: string
+    description: "vSphere username to use to connect to the environment"
+  - name: provider_vsphere_password
+    type: string
+    description: "vSphere password"
+    sensitive: "true"
+  - name: deploy_vsphere_datacenter
+    type: string
+    description: "vSphere datacenter in which the virtual machine will be deployed."
+  - name: deploy_vsphere_cluster
+    type: string
+    description: "vSphere cluster in which the virtual machine will be deployed."
+  - name: deploy_vsphere_datastore
+    type: string
+    description: "Datastore in which the virtual machine will be deployed."
+  - name: deploy_vsphere_folder
+    type: string
+    description: "The path to the folder to put this virtual machine in, relative to the datacenter that the resource pool is in."
+  - name: deploy_vsphere_network
+    type: string
+    description: "Portgroup to which the virtual machine will be connected."
+  - name: guest_name_prefix
+    type: string
+    description: "VM / hostname prefix for the kubernetes cluster."
+  - name: guest_template
+    type: string
+    description: "The source virtual machine or template to clone from."
+  - name: num_cpus
+    type: string
+    description: "The number of virtual processors to assign to this virtual machine."
+    default: 2
+  - name: memory
+    type: string
+    description: "The size of the virtual machine's memory, in MB. Default: 1024 (1 GB)."
+    default: 1024
+  - name: ipv4_netmask
+    type: string
+    description: "The IPv4 subnet mask, in bits (example: 24 for 255.255.255.0)."
+  - name: ipv4_gateway
+    type: string
+    description: "The IPv4 default gateway."
+  - name: dns_server_list
+    type: list
+    description: "The list of DNS servers to configure on the virtual machine."
+  - name: dns_suffix_list
+    type: list
+    description: "A list of DNS search domains to add to the DNS configuration on the virtual machine."
+  - name: domain
+    type: string
+    description: "The domain name for this machine."
+  - name: guest_ssh_user
+    type: string
+    description: "SSH username to connect to the guest VM."
+  - name: guest_ssh_password
+    type: string
+    description: "SSH password to connect to the guest VM."
+  - name: environment
+    type: string
+    description: "Name of the environment"
+  - name: component_name
+    type: string
+    description: "Name of the component of the cluster"
+  - name: interface
+    type: string
+    description: "IP address"
+  - name: node_name
+    type: string
+    description: "Name of the node of the cluster"
+
+resource_name: arti
+
+#environment_module_outputs:
+#  - name: "{{ vm_params.cluster_name }}"
+#    value: "${module.{{ vm_params.cluster_name }}.{{ resource_name }}}"
+
+environment_module_outputs:
+  - name: "{{ inventory_hostname }}"
+    value: "${module.{{ inventory_hostname }}.{{ resource_name }}}"
+
+resource_module_outputs:
+  - name: "{{ resource_name }}"
+    value: ${formatlist("%s %s.%s %s", vsphere_virtual_machine.{{ resource_name }}.*.name, vsphere_virtual_machine.{{ resource_name }}.*.name, "${var.domain}", vsphere_virtual_machine.{{ resource_name }}.*.guest_ip_addresses.0 )}

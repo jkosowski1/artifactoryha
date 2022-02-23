@@ -1,0 +1,8 @@
+
+vm_params:
+  cluster_name: artifactory_nodes
+  name: "{{ inventory_hostname }}"
+  short_name: arti
+  num_cpus: 2
+  memory: 4096
+  source: "{{ terraform_resource_module_dir }}"

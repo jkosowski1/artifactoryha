@@ -1,0 +1,14 @@
+{% for ds in vsphere_data_sources %}
+{% if (ds.data_source is defined) and (ds.ds_name is defined) %}
+data "{{ ds.data_source }}" "{{ ds.ds_name }}" {
+{% endif %}
+{% if ds.name is defined %}
+  name = {{ ds.name }}
+{% endif %}
+{% if ds.datacenter_id is defined %}
+  datacenter_id = {{ ds.datacenter_id }}
+{% endif %}
+{% if (ds.data_source is defined) and (ds.ds_name is defined) %}
+}
+{% endif %}
+{% endfor %}

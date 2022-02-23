@@ -1,0 +1,40 @@
+module "{{ vm_params.name }}" {
+  source = "{{ vm_params.source }}"
+  component_name = "{{ vm_params.short_name }}"
+  node_name = "{{ inventory_hostname }}"
+  num_cpus = "{{ vm_params.num_cpus }}"
+  memory = "{{ vm_params.memory }}"
+  interface = "{{ ansible_host }}"
+  dns_server_list = [ {{ '\"' + dns_server_list  | join('\", \"') + '\"' }} ]
+  dns_suffix_list = [ {{ '\"' + domain + '\"' }} ]
+  environment = "{{ env }}"
+  guest_name_prefix = "k8s-{{ env }}"
+  provider_vsphere_host     = var.provider_vsphere_host
+  provider_vsphere_user     = var.provider_vsphere_user
+  provider_vsphere_password = var.provider_vsphere_password
+  deploy_vsphere_cluster    = var.deploy_vsphere_cluster
+  deploy_vsphere_datastore  = var.deploy_vsphere_datastore
+  deploy_vsphere_datacenter = var.deploy_vsphere_datacenter
+  deploy_vsphere_folder = var.deploy_vsphere_folder
+  guest_ssh_user        = var.guest_ssh_user
+  guest_ssh_password    = var.guest_ssh_password
+  deploy_vsphere_network = var.deploy_vsphere_network
+  ipv4_gateway = var.ipv4_gateway
+  ipv4_netmask = var.ipv4_netmask
+  guest_template = var.guest_template
+  domain = var.domain
+}
+
+{% for i in environment_module_outputs %}
+output "{{ i.name }}" {
+{% if i.sensitive is defined %}
+  sensitive = {{ i.sensitive }}
+{% endif %}
+{% if i.description is defined %}
+  description = "{{ i.description }}"
+{% endif %}
+{% if i.value is defined %}
+  value = "{{ i.value }}"
+{% endif %}
+}
+{% endfor %}

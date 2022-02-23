@@ -1,0 +1,15 @@
+#!/bin/sh
+
+export TF_VAR_provider_vsphere_host={{ provider_vsphere_host }}
+export TF_VAR_provider_vsphere_user={{ provider_vsphere_user }}
+export TF_VAR_deploy_vsphere_cluster={{ deploy_vsphere_cluster }}
+export TF_VAR_deploy_vsphere_datastore={{ deploy_vsphere_datastore }}
+export TF_VAR_deploy_vsphere_datacenter={{ deploy_vsphere_datacenter }}
+export TF_VAR_deploy_vsphere_folder={{ deploy_vsphere_folder }}
+export TF_VAR_guest_ssh_user={{ guest_ssh_user }}
+export TF_VAR_deploy_vsphere_network="{{ deploy_vsphere_network }}"
+export TF_VAR_ipv4_gateway={{ ipv4_gateway }}
+export TF_VAR_ipv4_netmask={{ ipv4_netmask }}
+export TF_VAR_guest_template={{ guest_template }} 
+export TF_VAR_domain={{ domain }}
+export TF_LOG=ERROR

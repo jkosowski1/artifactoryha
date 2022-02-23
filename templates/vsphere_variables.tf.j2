@@ -1,0 +1,19 @@
+{% for i in module_inputs %}
+variable "{{ i.name }}" {
+{% if i.sensitive is defined %}
+  sensitive = {{ i.sensitive }}
+{% endif %}
+{% if i.description is defined %}
+  description = "{{ i.description }}"
+{% endif %}
+{% if i.type is defined %}
+  type = {{ i.type }}
+{% endif %}
+{% if i.default is defined %}
+  default = "{{ i.default }}"
+{% endif %}
+{% if i.validation is defined %}
+  validation = "{{ i.validation }}"
+{% endif %}
+}
+{% endfor %}

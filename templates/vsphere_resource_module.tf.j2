@@ -1,0 +1,61 @@
+resource "vsphere_virtual_machine" "{{ resource_name }}" {
+  name             = "${var.node_name}"
+  resource_pool_id = data.vsphere_compute_cluster.target_cluster.resource_pool_id
+  datastore_id     = data.vsphere_datastore.target_datastore.id
+  folder           = var.deploy_vsphere_folder
+
+  num_cpus = "${var.num_cpus}"
+  memory = "${var.memory}"
+  guest_id = data.vsphere_virtual_machine.source_template.guest_id
+
+  scsi_type = data.vsphere_virtual_machine.source_template.scsi_type
+
+  network_interface {
+    network_id   = data.vsphere_network.target_network.id
+    adapter_type = data.vsphere_virtual_machine.source_template.network_interface_types[0]
+  }
+
+  disk {
+    label            = "disk0"
+    size             = data.vsphere_virtual_machine.source_template.disks[0].size
+    eagerly_scrub    = data.vsphere_virtual_machine.source_template.disks[0].eagerly_scrub
+    thin_provisioned = data.vsphere_virtual_machine.source_template.disks[0].thin_provisioned
+  }
+
+  clone {
+    template_uuid = data.vsphere_virtual_machine.source_template.id
+
+    customize {
+      linux_options {
+        host_name = "${var.node_name}"
+        domain = var.domain
+      }
+
+      network_interface {
+        ipv4_address = var.interface
+        ipv4_netmask = var.ipv4_netmask
+      }
+
+      ipv4_gateway    = var.ipv4_gateway
+      dns_server_list = var.dns_server_list
+      dns_suffix_list = var.dns_suffix_list
+    }
+  }
+
+  boot_delay = 1000
+
+}
+
+{% for i in resource_module_outputs %}
+output "{{ i.name }}" {
+{% if i.sensitive is defined %}
+  sensitive = {{ i.sensitive }}
+{% endif %}
+{% if i.description is defined %}
+  description = "{{ i.description }}"
+{% endif %}
+{% if i.value is defined %}
+  value = "{{ i.value }}"
+{% endif %}
+}
+{% endfor %}

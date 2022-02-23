@@ -1,0 +1,13 @@
+{% for i in module_outputs %}
+output "{{ i.name }}" {
+{% if i.sensitive is defined %}
+  sensitive = {{ i.sensitive }}
+{% endif %}
+{% if i.description is defined %}
+  description = "{{ i.description }}"
+{% endif %}
+{% if i.value is defined %}
+  value = "{{ i.value }}"
+{% endif %}
+}
+{% endfor %}

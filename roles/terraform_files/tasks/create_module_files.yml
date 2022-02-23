@@ -1,0 +1,44 @@
+---
+
+- name: Set input and output variables for TF resource module
+  set_fact:
+    module_inputs: "{{ resource_module_variables }}"
+    module_outputs: "{{ resource_module_outputs }}"
+  when: is_tf_resource_module
+
+- name: Set input and output variables for TF environment module
+  set_fact:
+    module_inputs: "{{ environment_module_variables }}"
+    module_outputs: "{{ environment_module_outputs }}"
+  when: not is_tf_resource_module
+
+- name: Create inner TF module files from templates
+  local_action:
+    module: template
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  when: item.create
+  loop:
+    - { src: 'vsphere_variables.tf.j2', dest: "{{ dir }}/variables.tf", create: true }
+    - { src: 'vsphere_data_sources.tf.j2', dest: "{{ dir }}/data_sources.tf", create: "{{ is_tf_resource_module }}" }
+    - { src: 'vsphere_resource_module.tf.j2', dest: "{{ dir }}/main.tf", create: "{{ is_tf_resource_module }}" }
+    - { src: 'vsphere_environment_module.tf.j2', dest: "{{ dir }}/{{ inventory_hostname }}.tf", create: "{{ not is_tf_resource_module }}" }
+
+- name: Create TF files for every vm in environment module
+  local_action:
+    module: template
+    src: 'vsphere_environment_module.tf.j2'
+    dest: "{{ dir }}/{{ inventory_hostname }}.tf"
+  when: not is_tf_resource_module
+
+- name: Copy inner TF files resource module directory
+  local_action:
+    module: copy
+    force: yes
+    mode: u=rw,g=r,o=r
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: 'tf_versions.tf', dest: "{{ dir }}/versions.tf", create: "{{ is_tf_resource_module }}" }
+    - { src: 'tf_provider_vsphere.tf', dest: "{{ dir }}/providers.tf", create: "{{ is_tf_resource_module }}" }
+  when: is_tf_resource_module
